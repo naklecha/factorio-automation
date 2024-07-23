@@ -61,7 +61,7 @@ remote.call("factorio_tasks", "command_name", arg1, arg2, ...)
 /c remote.call("factorio_tasks", "mine_entity", "resource", "iron-ore")
 
 -- Walk to the nearest furnace
-/c remote.call("factorio_tasks", "walk_to_entity", "entity", "stone-furnace", 50)
+/c remote.call("factorio_tasks", "walk_to_entity", "furnace", "stone-furnace", 50)
 
 -- Put coal into the furnace
 /c remote.call("factorio_tasks", "place_item_in_chest", "coal", 5)
