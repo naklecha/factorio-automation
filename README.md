@@ -53,21 +53,21 @@ remote.call("factorio_tasks", "command_name", arg1, arg2, ...)
 ## Examples
 ```lua
 -- Walk to and mine coal
-remote.call("factorio_tasks", "walk_to_entity", "resource", "coal", 50)
-remote.call("factorio_tasks", "mine_entity", "resource", "coal")
+/c remote.call("factorio_tasks", "walk_to_entity", "resource", "coal", 50)
+/c remote.call("factorio_tasks", "mine_entity", "resource", "coal")
 
 -- Walk to and mine iron ore
-remote.call("factorio_tasks", "walk_to_entity", "resource", "iron-ore", 50)
-remote.call("factorio_tasks", "mine_entity", "resource", "iron-ore")
+/c remote.call("factorio_tasks", "walk_to_entity", "resource", "iron-ore", 50)
+/c remote.call("factorio_tasks", "mine_entity", "resource", "iron-ore")
 
 -- Walk to the nearest furnace
-remote.call("factorio_tasks", "walk_to_entity", "entity", "stone-furnace", 50)
+/c remote.call("factorio_tasks", "walk_to_entity", "entity", "stone-furnace", 50)
 
 -- Put coal into the furnace
-remote.call("factorio_tasks", "place_item_in_chest", "coal", 5)
+/c remote.call("factorio_tasks", "place_item_in_chest", "coal", 5)
 
 -- Put iron ore into the furnace
-remote.call("factorio_tasks", "place_item_in_chest", "iron-ore", 10)
+/c remote.call("factorio_tasks", "place_item_in_chest", "iron-ore", 10)
 ```
 
 ### Contributing
