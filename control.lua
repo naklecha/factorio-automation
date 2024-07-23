@@ -627,7 +627,9 @@ script.on_event(defines.events.on_tick, function(event)
                 player_inventory.remove({name = ingredient.name, count = ingredient.amount})
             end
 
-            player.begin_crafting{count = 1, recipe = recipe, silent = false}
+            local crafted_item = recipe.result
+            game.player.insert({name = crafted_item, count = 1})
+
             player_state.parameters.crafted = player_state.parameters.crafted + 1
 
             log("[AUTOMATE] Crafted 1 " .. player_state.parameters.item_name)
