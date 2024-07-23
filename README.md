@@ -1,7 +1,7 @@
 # factorio-automation
 <i>this repository is work in progress...</i>
 
-```factorio-automation``` is a powerful library that provides a set of remote interfaces that can be used to create Factorio agents. This library allows users to control player actions, manage resources, and automate complex processes through simple function calls.
+```factorio-automation``` is a powerful mod that provides a set of remote interfaces that can be used to create Factorio agents. This library allows users to control player actions, manage resources, and automate complex processes through simple function calls.
 
 <div>
     <img src="image.jpeg"/>
