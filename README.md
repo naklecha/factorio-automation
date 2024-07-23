@@ -50,24 +50,45 @@ remote.call("factorio_tasks", "command_name", arg1, arg2, ...)
 - `log_player_info(player_id)`
   Record detailed player information.
 
-## Examples
+## Example
+This example, collects 5 stone, crafts a stone furnace, places a stone furnace, collects iron and coal and then places them in the stone furnace. 
 ```lua
+-- Walk to stone and place furnace 
+/c remote.call("factorio_tasks", "walk_to_entity", "resource", "stone", 50)
+
+/c remote.call("factorio_tasks", "mine_entity", "resource", "stone")
+/c remote.call("factorio_tasks", "mine_entity", "resource", "stone")
+/c remote.call("factorio_tasks", "mine_entity", "resource", "stone")
+/c remote.call("factorio_tasks", "mine_entity", "resource", "stone")
+/c remote.call("factorio_tasks", "mine_entity", "resource", "stone")
+
+/c remote.call("factorio_tasks", "craft_item", "stone-furnace", 1)
+/c remote.call("factorio_tasks", "place_entity", "stone-furnace")
+
 -- Walk to and mine coal
 /c remote.call("factorio_tasks", "walk_to_entity", "resource", "coal", 50)
+/c remote.call("factorio_tasks", "mine_entity", "resource", "coal")
+/c remote.call("factorio_tasks", "mine_entity", "resource", "coal")
+/c remote.call("factorio_tasks", "mine_entity", "resource", "coal")
+/c remote.call("factorio_tasks", "mine_entity", "resource", "coal")
 /c remote.call("factorio_tasks", "mine_entity", "resource", "coal")
 
 -- Walk to and mine iron ore
 /c remote.call("factorio_tasks", "walk_to_entity", "resource", "iron-ore", 50)
+/c remote.call("factorio_tasks", "mine_entity", "resource", "iron-ore")
+/c remote.call("factorio_tasks", "mine_entity", "resource", "iron-ore")
+/c remote.call("factorio_tasks", "mine_entity", "resource", "iron-ore")
+/c remote.call("factorio_tasks", "mine_entity", "resource", "iron-ore")
 /c remote.call("factorio_tasks", "mine_entity", "resource", "iron-ore")
 
 -- Walk to the nearest furnace
 /c remote.call("factorio_tasks", "walk_to_entity", "furnace", "stone-furnace", 50)
 
 -- Put coal into the furnace
-/c remote.call("factorio_tasks", "place_item_in_chest", "coal", 5)
+/c remote.call("factorio_tasks", "auto_insert_nearby", "coal", "furnace", 5)
 
 -- Put iron ore into the furnace
-/c remote.call("factorio_tasks", "place_item_in_chest", "iron-ore", 10)
+/c remote.call("factorio_tasks", "auto_insert_nearby", "iron-ore", "furnace", 5)
 ```
 
 ### Contributing
