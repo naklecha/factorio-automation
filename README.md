@@ -9,35 +9,35 @@
 
 ## Remote Interfaces
 
-#### 1. ```walk_to_entity(entity_type, entity_name, search_radius)```
+```walk_to_entity(entity_type, entity_name, search_radius)```
 
 Instructs the player to walk to the nearest entity of the specified type and name within the given search radius.
 
-#### 2. ```mine_entity(entity_type, entity_name)```
+```mine_entity(entity_type, entity_name)```
 Commands the player to mine the nearest entity of the specified type and name.
 
-#### 3. ```place_entity(entity_name)```
+```place_entity(entity_name)```
 Places an entity of the specified name at the given position.
 
-#### 4. ```place_item_in_chest(item_name, count)```
+```place_item_in_chest(item_name, count)```
 Instructs the player to place the specified number of items into a nearby chest.
 
-#### 5. ```auto_insert_nearby(item_name, entity_type, max_count)```
+```auto_insert_nearby(item_name, entity_type, max_count)```
 Automatically inserts items into nearby entities of the specified type, up to the maximum count.
 
-#### 6. ```pick_up_item(item_name, count, container_type)```
+```pick_up_item(item_name, count, container_type)```
 Commands the player to pick up a specified number of items from nearby containers of the given type.
 
-#### 7. ```craft_item(item_name, count)```
+```craft_item(item_name, count)```
 Instructs the player to craft a specified number of items.
 
-#### 8. ```attack_nearest_enemy(search_radius)```
+```attack_nearest_enemy(search_radius)```
 Commands the player to attack the nearest enemy within the given search radius.
 
-#### 9. ```research_technology(technology_name)```
+```research_technology(technology_name)```
 Initiates research for the specified technology.
 
-#### 10. ```log_player_info(player_id)```
+```log_player_info(player_id)```
 Logs detailed information about the player, including inventory, equipment, and surrounding entities.
 
 ## Usage Examples
