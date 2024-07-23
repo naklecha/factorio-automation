@@ -7,69 +7,66 @@
     <img src="image.jpeg"/>
 </div>
 
-## Remote Interfaces
+## Usage
+To use these remote interfaces, call them using the remote.call function in Factorio:
+```
+remote.call("factorio_tasks", "command_name", arg1, arg2, ...)
+```
 
-```walk_to_entity(entity_type, entity_name, search_radius)```
+## Commands
 
-Instructs the player to walk to the nearest entity of the specified type and name within the given search radius.
+### Movement and Interaction
+- `walk_to_entity(entity_type, entity_name, search_radius)`
+  Walk to the nearest specified entity within range.
 
-```mine_entity(entity_type, entity_name)```
-Commands the player to mine the nearest entity of the specified type and name.
+- `mine_entity(entity_type, entity_name)`
+  Mine the nearest specified entity.
 
-```place_entity(entity_name)```
-Places an entity of the specified name at the given position.
+- `place_entity(entity_name)`
+  Place the specified entity at current position.
 
-```place_item_in_chest(item_name, count)```
-Instructs the player to place the specified number of items into a nearby chest.
+### Inventory Management
+- `place_item_in_chest(item_name, count)`
+  Put items into a nearby chest.
 
-```auto_insert_nearby(item_name, entity_type, max_count)```
-Automatically inserts items into nearby entities of the specified type, up to the maximum count.
+- `auto_insert_nearby(item_name, entity_type, max_count)`
+  Insert items into nearby entities, up to a limit.
 
-```pick_up_item(item_name, count, container_type)```
-Commands the player to pick up a specified number of items from nearby containers of the given type.
+- `pick_up_item(item_name, count, container_type)`
+  Collect items from nearby containers.
 
-```craft_item(item_name, count)```
-Instructs the player to craft a specified number of items.
+### Crafting and Research
+- `craft_item(item_name, count)`
+  Craft a number of specified items.
 
-```attack_nearest_enemy(search_radius)```
-Commands the player to attack the nearest enemy within the given search radius.
+- `research_technology(technology_name)`
+  Start researching a technology.
 
-```research_technology(technology_name)```
-Initiates research for the specified technology.
+### Combat
+- `attack_nearest_enemy(search_radius)`
+  Attack the closest enemy within range.
 
-```log_player_info(player_id)```
-Logs detailed information about the player, including inventory, equipment, and surrounding entities.
+### Utility
+- `log_player_info(player_id)`
+  Record detailed player information.
 
-## Usage Examples
-
-### Walking to an Entity
+## Examples
 ```lua
+-- Walk to an iron ore patch
 remote.call("factorio_tasks", "walk_to_entity", "resource", "iron-ore", 50)
-```
-This command will make the player walk to the nearest iron ore patch within a 50-tile radius.
 
-### Mining an Entity
-```lua
+-- Mine copper ore
 remote.call("factorio_tasks", "mine_entity", "resource", "copper-ore")
-```
-This will instruct the player to mine the nearest copper ore.
-### Placing an Entity
-```lua
+
+-- Place an assembling machine
 remote.call("factorio_tasks", "place_entity", "assembling-machine-1")
-```
-This command places an assembling machine at coordinates (10, 10).
 
-### Crafting Items
-```lua
+-- Craft electronic circuits
 remote.call("factorio_tasks", "craft_item", "electronic-circuit", 50)
-```
-This instructs the player to craft 50 electronic circuits.
 
-### Researching Technology
-```lua
+-- Research automation technology
 remote.call("factorio_tasks", "research_technology", "automation")
 ```
-This initiates research for the "automation" technology.
 
 ### Contributing
 Contributions to Automate Factorio are welcome! Please feel free to submit pull requests, create issues or spread the word.
