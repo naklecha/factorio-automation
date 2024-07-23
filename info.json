@@ -1,0 +1,9 @@
+{
+    "name": "factorio-automation",
+    "version": "0.1.0",
+    "title": "factorio-automation",
+    "author": "naklecha",
+    "factorio_version": "1.1",
+    "dependencies": ["base >= 1.1"],
+    "description": "an automation mod for factorio."
+  }
