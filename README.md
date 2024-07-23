@@ -53,16 +53,7 @@ remote.call("factorio_tasks", "command_name", arg1, arg2, ...)
 ## Example
 This example, collects 5 stone, crafts a stone furnace, places a stone furnace, collects iron and coal and then places them in the stone furnace. 
 ```lua
--- Walk to stone and place furnace 
-/c remote.call("factorio_tasks", "walk_to_entity", "resource", "stone", 500)
-
-/c remote.call("factorio_tasks", "mine_entity", "resource", "stone")
-/c remote.call("factorio_tasks", "mine_entity", "resource", "stone")
-/c remote.call("factorio_tasks", "mine_entity", "resource", "stone")
-/c remote.call("factorio_tasks", "mine_entity", "resource", "stone")
-/c remote.call("factorio_tasks", "mine_entity", "resource", "stone")
-
-/c remote.call("factorio_tasks", "craft_item", "stone-furnace", 1)
+-- Place a stone furnace
 /c remote.call("factorio_tasks", "place_entity", "stone-furnace")
 
 -- Walk to and mine coal
