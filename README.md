@@ -52,20 +52,22 @@ remote.call("factorio_tasks", "command_name", arg1, arg2, ...)
 
 ## Examples
 ```lua
--- Walk to an iron ore patch
+-- Walk to and mine coal
+remote.call("factorio_tasks", "walk_to_entity", "resource", "coal", 50)
+remote.call("factorio_tasks", "mine_entity", "resource", "coal")
+
+-- Walk to and mine iron ore
 remote.call("factorio_tasks", "walk_to_entity", "resource", "iron-ore", 50)
+remote.call("factorio_tasks", "mine_entity", "resource", "iron-ore")
 
--- Mine copper ore
-remote.call("factorio_tasks", "mine_entity", "resource", "copper-ore")
+-- Walk to the nearest furnace
+remote.call("factorio_tasks", "walk_to_entity", "entity", "stone-furnace", 50)
 
--- Place an assembling machine
-remote.call("factorio_tasks", "place_entity", "assembling-machine-1")
+-- Put coal into the furnace
+remote.call("factorio_tasks", "place_item_in_chest", "coal", 5)
 
--- Craft electronic circuits
-remote.call("factorio_tasks", "craft_item", "electronic-circuit", 50)
-
--- Research automation technology
-remote.call("factorio_tasks", "research_technology", "automation")
+-- Put iron ore into the furnace
+remote.call("factorio_tasks", "place_item_in_chest", "iron-ore", 10)
 ```
 
 ### Contributing
