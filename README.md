@@ -54,7 +54,7 @@ remote.call("factorio_tasks", "command_name", arg1, arg2, ...)
 This example, collects 5 stone, crafts a stone furnace, places a stone furnace, collects iron and coal and then places them in the stone furnace. 
 ```lua
 -- Walk to stone and place furnace 
-/c remote.call("factorio_tasks", "walk_to_entity", "resource", "stone", 50)
+/c remote.call("factorio_tasks", "walk_to_entity", "resource", "stone", 500)
 
 /c remote.call("factorio_tasks", "mine_entity", "resource", "stone")
 /c remote.call("factorio_tasks", "mine_entity", "resource", "stone")
@@ -66,7 +66,7 @@ This example, collects 5 stone, crafts a stone furnace, places a stone furnace, 
 /c remote.call("factorio_tasks", "place_entity", "stone-furnace")
 
 -- Walk to and mine coal
-/c remote.call("factorio_tasks", "walk_to_entity", "resource", "coal", 50)
+/c remote.call("factorio_tasks", "walk_to_entity", "resource", "coal", 500)
 /c remote.call("factorio_tasks", "mine_entity", "resource", "coal")
 /c remote.call("factorio_tasks", "mine_entity", "resource", "coal")
 /c remote.call("factorio_tasks", "mine_entity", "resource", "coal")
@@ -74,7 +74,7 @@ This example, collects 5 stone, crafts a stone furnace, places a stone furnace, 
 /c remote.call("factorio_tasks", "mine_entity", "resource", "coal")
 
 -- Walk to and mine iron ore
-/c remote.call("factorio_tasks", "walk_to_entity", "resource", "iron-ore", 50)
+/c remote.call("factorio_tasks", "walk_to_entity", "resource", "iron-ore", 500)
 /c remote.call("factorio_tasks", "mine_entity", "resource", "iron-ore")
 /c remote.call("factorio_tasks", "mine_entity", "resource", "iron-ore")
 /c remote.call("factorio_tasks", "mine_entity", "resource", "iron-ore")
