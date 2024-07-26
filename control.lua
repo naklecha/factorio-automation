@@ -371,7 +371,17 @@ script.on_event(defines.events.on_tick, function(event)
 
         if nearest_entity and not player_state.parameters.calculating_path and not player_state.parameters.path then
             local character = player.character
-            local bbox = {{character.position.x, character.position.y},{character.position.x, character.position.y}}
+             -- TODO: improve path following
+             -- currently using larger than character bbox as a workaround for the path following getting stuck on objects
+             -- may sometimes still get stuck on trees and will fail to find small passages
+            local bbox = {{-0.5, -0.5}, {0.5, 0.5}}
+            local start = player.surface.find_non_colliding_position(
+                "iron-chest", -- TODO: using iron chest bbox so request_path doesn't fail standing near objects using the larger bbox
+                character.position,
+                10,
+                0.5,
+                false
+            )
             player.surface.request_path{
                 bounding_box = bbox,
                 collision_mask = {
@@ -382,15 +392,15 @@ script.on_event(defines.events.on_tick, function(event)
                     "object-layer"
                 },
                 radius = 2,
-                start = character.position,
+                start = start,
                 goal = nearest_entity.position,
                 force = player.force,
                 entity_to_ignore = character,
                 pathfind_flags = {
                     cache = false,
                     no_break = true,
-                    prefer_straight_paths = true,
-                    allow_paths_through_own_entities = true
+                    prefer_straight_paths = false,
+                    allow_paths_through_own_entities = false
                 }
             }
             player_state.parameters.calculating_path = true
