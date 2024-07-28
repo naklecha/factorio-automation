@@ -314,12 +314,6 @@ end)
 script.on_event(defines.events.on_tick, function(event)
     if not setup_complete then
         local surface = game.surfaces[1]
-        local cliffs = surface.find_entities_filtered{name = "cliff"}
-        log("[AUTOMATE] Removing " .. #cliffs .. " cliffs")
-        for _, cliff in pairs(cliffs) do
-            cliff.destroy()
-        end
-        
         local enemies = surface.find_entities_filtered{force = "enemy"}
         log("[AUTOMATE] Removing " .. #enemies .. " enemies")
         for _, enemy in pairs(enemies) do
