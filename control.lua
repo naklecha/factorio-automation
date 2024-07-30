@@ -1,3 +1,4 @@
+-- Constants
 local TASK_STATES = {
     IDLE = 0,
     WALKING_TO_ENTITY = 1,
@@ -8,17 +9,72 @@ local TASK_STATES = {
     CRAFTING = 6,
     RESEARCHING = 7,
     WALKING_DIRECT = 8,
+    AUTO_INSERTING = 9,
+    ATTACKING = 10
 }
 
-local setup_complete = false
+-- Configuration
+local CONFIG = {
+    SEARCH_RADIUS = 20,
+    PATH_UPDATE_INTERVAL = 60,  -- Update path every 60 ticks
+    BOUNDING_BOX = {{-0.5, -0.5}, {0.5, 0.5}},
+    COLLISION_MASK = {"player-layer", "train-layer", "consider-tile-transitions", "water-tile", "object-layer"}
+}
 
+-- Global Variables
+local setup_complete = false
 local player_state = {
     task_state = TASK_STATES.IDLE,
     parameters = {}
 }
 
-local function log_player_info(player_id)
+-- Utility functions
+local function log_message(message)
+    log("[AUTOMATE] " .. message)
+end
+
+local function get_player()
     local player = game.connected_players[1]
+    if not player or not player.character then
+        log_message("No valid player found")
+        return nil
+    end
+    return player
+end
+
+local function get_direction(start_position, end_position)
+    local angle = math.atan2(end_position.y - start_position.y, start_position.x - end_position.x)
+    local octant = (angle + math.pi) / (2 * math.pi) * 8 + 0.5
+
+    if octant < 1 then
+        return defines.direction.east
+    elseif octant < 2 then
+        return defines.direction.northeast
+    elseif octant < 3 then
+        return defines.direction.north
+    elseif octant < 4 then
+        return defines.direction.northwest
+    elseif octant < 5 then
+        return defines.direction.west
+    elseif octant < 6 then
+        return defines.direction.southwest
+    elseif octant < 7 then
+        return defines.direction.south
+    else
+        return defines.direction.southeast
+    end
+end
+
+local function start_mining(player, entity_position)
+    player.update_selected_entity(entity_position)
+    player.mining_state = {mining = true, position = entity_position}
+    log("[AUTOMATE] Started mining at position: " .. serpent.line(entity_position))
+end
+
+-- Log player info 
+-- Basically, creates a huge table of info with inventory, position, research info, etc.
+local function log_player_info(player_id)
+    local player = get_player()
 
     local log_data = {}
 
@@ -88,6 +144,8 @@ local function log_player_info(player_id)
     log("[AUTOMATE] Player Info: " .. serpent.block(log_data))
 end
 
+-- Are these similar to helper functions? But as tasks?
+-- I think these are the functions that are called in the Lua console? 
 remote.add_interface("factorio_tasks", 
 {
     walk_to_entity = function(entity_type, entity_name, search_radius)
@@ -111,7 +169,9 @@ remote.add_interface("factorio_tasks",
         }
         return true
     end,
-    
+   
+    -- Mine an entity
+    -- Takes in an entity type and entity name 
     mine_entity = function(entity_type, entity_name)
         if player_state.task_state ~= TASK_STATES.IDLE then
             log("[AUTOMATE] Cannot start mine_entity task: Player is not idle")
@@ -125,6 +185,8 @@ remote.add_interface("factorio_tasks",
         }
     end,
 
+    -- Place an entity
+    -- Takes an entity name
     place_entity = function(entity_name)
         if player_state.task_state ~= TASK_STATES.IDLE then
             log("[AUTOMATE] Cannot start place_entity task: Player is not idle")
@@ -138,6 +200,8 @@ remote.add_interface("factorio_tasks",
         return true
     end,
 
+    -- Place an item in chest
+    -- Takes in an item name and count
     place_item_in_chest = function(item_name, count)
         if player_state.task_state ~= TASK_STATES.IDLE then
             log("[AUTOMATE] Cannot start place_item_in_chest task: Player is not idle")
@@ -153,6 +217,8 @@ remote.add_interface("factorio_tasks",
         return true
     end,
 
+    -- Auto insert nearby
+    -- Takes in an item name, the entity take and a max count
     auto_insert_nearby = function(item_name, entity_type, max_count)
         if player_state.task_state ~= TASK_STATES.IDLE then
             log("[AUTOMATE] Cannot start auto_insert_nearby task: Player is not idle")
@@ -168,6 +234,8 @@ remote.add_interface("factorio_tasks",
         return true, "Task started"
     end,
 
+    -- Pick up item 
+    -- Takes in item_name, count and container_type
     pick_up_item = function(item_name, count, container_type)
         if player_state.task_state ~= TASK_STATES.IDLE then
             log("[AUTOMATE] Cannot start pick_up_item task: Player is not idle")
@@ -184,12 +252,14 @@ remote.add_interface("factorio_tasks",
         return true, "Task started"
     end,
 
+    -- Craft an item
+    -- Takes in an item_name and count
     craft_item = function(item_name, count)
         if player_state.task_state ~= TASK_STATES.IDLE then
             log("[AUTOMATE] Cannot start craft_item task: Player is not idle")
             return false, "Task already in progress"
         end
-        local player = game.connected_players[1]
+        local player = get_player()
         if not player.force.recipes[item_name] then
             log("[AUTOMATE] Cannot start craft_item task: Recipe not available")
             return false, "Recipe not available"
@@ -208,6 +278,8 @@ remote.add_interface("factorio_tasks",
         return true, "Task started"
     end,
 
+    -- Attack the nearest enemy
+    -- Takes in a search radius
     attack_nearest_enemy = function(search_radius)
         if player_state.task_state ~= TASK_STATES.IDLE then
             log("[AUTOMATE] Cannot start attack_nearest_enemy task: Player is not idle")
@@ -222,12 +294,14 @@ remote.add_interface("factorio_tasks",
         return true, "Task started"
     end,
 
+    -- Research a technology 
+    -- Takes in a technology name
     research_technology = function(technology_name)
         if player_state.task_state ~= TASK_STATES.IDLE then
             log("[AUTOMATE] Cannot start research_technology task: Player is not idle")
             return false, "Task already in progress"
         end
-        local player = game.connected_players[1]
+        local player = get_player()
         local force = player.force
         local tech = force.technologies[technology_name]
         
@@ -262,35 +336,8 @@ remote.add_interface("factorio_tasks",
     end,
 })
 
-local function get_direction(start_position, end_position)
-    local angle = math.atan2(end_position.y - start_position.y, start_position.x - end_position.x)
-    local octant = (angle + math.pi) / (2 * math.pi) * 8 + 0.5
-
-    if octant < 1 then
-        return defines.direction.east
-    elseif octant < 2 then
-        return defines.direction.northeast
-    elseif octant < 3 then
-        return defines.direction.north
-    elseif octant < 4 then
-        return defines.direction.northwest
-    elseif octant < 5 then
-        return defines.direction.west
-    elseif octant < 6 then
-        return defines.direction.southwest
-    elseif octant < 7 then
-        return defines.direction.south
-    else
-        return defines.direction.southeast
-    end
-end
-
-local function start_mining(player, entity_position)
-    player.update_selected_entity(entity_position)
-    player.mining_state = {mining = true, position = entity_position}
-    log("[AUTOMATE] Started mining at position: " .. serpent.line(entity_position))
-end
-
+-- Event handlers
+-- for when a path calculation is completed
 script.on_event(defines.events.on_script_path_request_finished, function(event)
     if event.path and player_state.task_state == TASK_STATES.WALKING_TO_ENTITY then
         player_state.parameters.path = event.path
@@ -305,13 +352,16 @@ script.on_event(defines.events.on_script_path_request_finished, function(event)
     end
 end)
 
+-- Event handler for when a player mines something
 script.on_event(defines.events.on_player_mined_entity, function(event)
     log("[AUTOMATE] Entity mined, resetting to IDLE state")
     player_state.task_state = TASK_STATES.IDLE
     player_state.parameters = {}
 end)
 
+-- Main loop event handler
 script.on_event(defines.events.on_tick, function(event)
+    -- Setup the game
     if not setup_complete then
         local surface = game.surfaces[1]
         local enemies = surface.find_entities_filtered{force = "enemy"}
@@ -324,16 +374,15 @@ script.on_event(defines.events.on_tick, function(event)
         log("[AUTOMATE] Setup complete")
     end
 
-    local player = game.connected_players[1]
-    if not player or not player.character then 
-        log("[AUTOMATE] No valid player found")
-        return 
-    end
+    local player = get_player()
 
+    -- Shrug shoulders if player is idle
     if player_state.task_state == TASK_STATES.IDLE then
         return
     end
     
+    -- Handle different task states
+    -- if walking
     if player_state.task_state == TASK_STATES.WALKING_TO_ENTITY then
         local nearest_entity = nil
         local min_distance = math.huge
@@ -351,6 +400,7 @@ script.on_event(defines.events.on_tick, function(event)
             return
         end
 
+        -- Find the nearest entity
         for _, entity in pairs(entities) do
             local distance = (entity.position.x - player.position.x)^2 + (entity.position.y - player.position.y)^2
             if distance < min_distance then
@@ -362,7 +412,8 @@ script.on_event(defines.events.on_tick, function(event)
         log("[AUTOMATE] Nearest entity position: " .. serpent.line(nearest_entity.position))
         log("[AUTOMATE] Player position: " .. serpent.line(player.position))
         log("[AUTOMATE] Player bounding box: " .. serpent.line(player.character.bounding_box))
-
+        
+        -- Get a path to the nearest entity if we haven't already
         if nearest_entity and not player_state.parameters.calculating_path and not player_state.parameters.path then
             local character = player.character
              -- TODO: improve path following
@@ -401,8 +452,10 @@ script.on_event(defines.events.on_tick, function(event)
             player_state.parameters.target_position = nearest_entity.position
             log("[AUTOMATE] Requested path calculation to " .. serpent.line(nearest_entity.position))
         end
-
+        
+        -- If we finally have a path, follow it
         if player_state.parameters.path and nearest_entity then
+            -- Draw the path
             if not player_state.parameters.path_drawn then
                 for i = 1, #player_state.parameters.path - 1 do
                     rendering.draw_line{
@@ -422,6 +475,7 @@ script.on_event(defines.events.on_tick, function(event)
             local path = player_state.parameters.path
             local path_index = player_state.parameters.path_index
             
+            -- Move the player along the path (in the direction)
             if path_index <= #path and math.sqrt((nearest_entity.position.x - player.position.x)^2+(nearest_entity.position.y - player.position.y)^2) > 1 then
                 local next_position = path[path_index].position
                 local direction = get_direction(player.position, next_position)
@@ -431,16 +485,19 @@ script.on_event(defines.events.on_tick, function(event)
                     direction = direction
                 }
                 
+                -- Make sure we are going to next position correctly
                 if (next_position.x - player.position.x)^2 + (next_position.y - player.position.y)^2 < 0.01 then
                     player_state.parameters.path_index = path_index + 1
                     log("[AUTOMATE] Moving to next path index: " .. player_state.parameters.path_index)
                 end
+                -- Make sure we reach the target
                 if (nearest_entity.position.x - player.position.x)^2 + (nearest_entity.position.y - player.position.y)^2 < 2 then
                     player_state.state = TASK_STATES.IDLE
                     player_state.parameters = {}
                     log("[AUTOMATE] Reached target entity, switching to IDLE state")
                 end
             else
+                -- We've reached the target - now what
                 rendering.clear()
                 player.walking_state = {walking = false}
                 
@@ -454,7 +511,10 @@ script.on_event(defines.events.on_tick, function(event)
                 end
             end
         end
+
+    -- Mining state
     elseif player_state.task_state == TASK_STATES.MINING then
+        -- Find the nearest entity to mine
         local nearest_entity = player.surface.find_entities_filtered({
             position = player.position,
             radius = 2,
@@ -470,6 +530,8 @@ script.on_event(defines.events.on_tick, function(event)
             player_state.task_state = TASK_STATES.IDLE
             player_state.parameters = {}
         end
+
+    -- Placing state
     elseif player_state.task_state == TASK_STATES.PLACING then
         if not player then 
             log("[AUTOMATE] Invalid player, ending PLACING task")
@@ -522,8 +584,10 @@ script.on_event(defines.events.on_tick, function(event)
             log("[AUTOMATE] Failed to place entity: " .. player_state.parameters.entity_name)
             return false, "Failed to place entity"
         end
+
+    -- Logic for automatically inserting items into nearby entities
     elseif player_state.task_state == TASK_STATES.AUTO_INSERTING then
-        local player = game.connected_players[1]
+        local player = get_player()
         local nearby_entities = player.surface.find_entities_filtered({
             position = player.position,
             radius = 8,
@@ -561,8 +625,10 @@ script.on_event(defines.events.on_tick, function(event)
         
         player_state.task_state = TASK_STATES.IDLE
         player_state.parameters = {}
+
+    -- If player wants to pick up
     elseif player_state.task_state == TASK_STATES.PICKING_UP then
-        local player = game.connected_players[1]
+        local player = get_player()
         local nearby_containers = player.surface.find_entities_filtered({
             position = player.position,
             radius = player_state.parameters.search_radius,
@@ -578,6 +644,7 @@ script.on_event(defines.events.on_tick, function(event)
                 local container_inventory = container.get_inventory(defines.inventory.chest)
                 local item_stack = container_inventory.find_item_stack(player_state.parameters.item_name)
                 
+                -- If stack, calculate how much you can pick up
                 if item_stack then
                     local to_pick_up = math.min(item_stack.count, player_state.parameters.count - picked_up_total)
                     local picked_up = player_inventory.insert({name = player_state.parameters.item_name, count = to_pick_up})
@@ -603,8 +670,10 @@ script.on_event(defines.events.on_tick, function(event)
         
         player_state.task_state = TASK_STATES.IDLE
         player_state.parameters = {}
+
+    -- Crafting state
     elseif player_state.task_state == TASK_STATES.CRAFTING then
-        local player = game.connected_players[1]
+        local player = get_player()
         local recipe = player.force.recipes[player_state.parameters.item_name]
         
         if not recipe then
@@ -618,6 +687,7 @@ script.on_event(defines.events.on_tick, function(event)
         local player_inventory = player.get_main_inventory()
         local can_craft = true
 
+        -- Loop through the ingredients and make sure you have everything
         for _, ingredient in pairs(ingredients) do
             if player_inventory.get_item_count(ingredient.name) < ingredient.amount then
                 can_craft = false
@@ -627,6 +697,7 @@ script.on_event(defines.events.on_tick, function(event)
         end
 
         if can_craft then
+            -- Interesting - you remove the ingredients and add the crafted item
             for _, ingredient in pairs(ingredients) do
                 player_inventory.remove({name = ingredient.name, count = ingredient.amount})
             end
@@ -643,15 +714,19 @@ script.on_event(defines.events.on_tick, function(event)
                 player_state.task_state = TASK_STATES.IDLE
                 player_state.parameters = {}
             end
+        -- If can't craft, switch to idle
         else
             log("[AUTOMATE] Not enough ingredients to craft, ending task")
             player_state.task_state = TASK_STATES.IDLE
             player_state.parameters = {}
         end
+
+    -- Researching state
     elseif player_state.task_state == TASK_STATES.RESEARCHING then
         local force = player.force
         local tech = force.technologies[player_state.parameters.technology_name]
-        
+
+        -- With this, are you able to research while doing other things? Don't remember how that works in game
         if tech.researched then
             log("[AUTOMATE] Research completed: " .. player_state.parameters.technology_name)
             player_state.task_state = TASK_STATES.IDLE
@@ -662,8 +737,9 @@ script.on_event(defines.events.on_tick, function(event)
             player_state.parameters = {}
         end
 
+    -- Direct walking state
     elseif player_state.task_state == TASK_STATES.WALKING_DIRECT then
-        local player = game.connected_players[1]
+        local player = get_player()
         local target = player_state.parameters.target_position
         
         if target then
