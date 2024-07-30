@@ -30,7 +30,7 @@ local player_state = {
 
 -- Utility functions
 local function log_message(message)
-    log("[AUTOMATE] " .. message)
+    log("" .. message)
 end
 
 local function get_player()
@@ -68,7 +68,7 @@ end
 local function start_mining(player, entity_position)
     player.update_selected_entity(entity_position)
     player.mining_state = {mining = true, position = entity_position}
-    log("[AUTOMATE] Started mining at position: " .. serpent.line(entity_position))
+    log_message("Started mining at position: " .. serpent.line(entity_position))
 end
 
 -- Log player info 
@@ -141,20 +141,22 @@ local function log_player_info(player_id)
         }
     end
 
-    log("[AUTOMATE] Player Info: " .. serpent.block(log_data))
+    log_message("Player Info: " .. serpent.block(log_data))
 end
 
 -- Are these similar to helper functions? But as tasks?
 -- I think these are the functions that are called in the Lua console? 
 remote.add_interface("factorio_tasks", 
 {
+    -- Walk to an entity
+    -- Creates the task and passes on to calculate path if needed?
     walk_to_entity = function(entity_type, entity_name, search_radius)
         if player_state.task_state ~= TASK_STATES.IDLE then
-            log("[AUTOMATE] Cannot start walk_to_entity task: Player is not idle")
+            log_message("Cannot start walk_to_entity task: Player is not idle")
             return false
         end
         
-        log("[AUTOMATE] New walk_to_entity task: " .. entity_type .. ", " .. entity_name .. ", radius: " .. search_radius)
+        log_message("New walk_to_entity task: " .. entity_type .. ", " .. entity_name .. ", radius: " .. search_radius)
         player_state.task_state = TASK_STATES.WALKING_TO_ENTITY
         player_state.parameters = {
             entity_type = entity_type,
@@ -174,10 +176,10 @@ remote.add_interface("factorio_tasks",
     -- Takes in an entity type and entity name 
     mine_entity = function(entity_type, entity_name)
         if player_state.task_state ~= TASK_STATES.IDLE then
-            log("[AUTOMATE] Cannot start mine_entity task: Player is not idle")
+            log_message("Cannot start mine_entity task: Player is not idle")
             return false
         end
-        log("[AUTOMATE] New mine_entity task: " .. entity_type .. ", " .. entity_name)
+        log_message("New mine_entity task: " .. entity_type .. ", " .. entity_name)
         player_state.task_state = TASK_STATES.MINING
         player_state.parameters = {
             entity_type = entity_type,
@@ -189,14 +191,14 @@ remote.add_interface("factorio_tasks",
     -- Takes an entity name
     place_entity = function(entity_name)
         if player_state.task_state ~= TASK_STATES.IDLE then
-            log("[AUTOMATE] Cannot start place_entity task: Player is not idle")
+            log_message("Cannot start place_entity task: Player is not idle")
             return false
         end
         player_state.task_state = TASK_STATES.PLACING
         player_state.parameters = {
             entity_name = entity_name
         }
-        log("[AUTOMATE] New place_entity task: " .. entity_name)
+        log_message("New place_entity task: " .. entity_name)
         return true
     end,
 
@@ -204,7 +206,7 @@ remote.add_interface("factorio_tasks",
     -- Takes in an item name and count
     place_item_in_chest = function(item_name, count)
         if player_state.task_state ~= TASK_STATES.IDLE then
-            log("[AUTOMATE] Cannot start place_item_in_chest task: Player is not idle")
+            log_message("Cannot start place_item_in_chest task: Player is not idle")
             return false
         end
         player_state.task_state = TASK_STATES.PLACING_IN_CHEST
@@ -213,7 +215,7 @@ remote.add_interface("factorio_tasks",
             count = count or 1,
             search_radius = 8
         }
-        log("[AUTOMATE] New place_item_in_chest task: " .. item_name .. " x" .. count)
+        log_message("New place_item_in_chest task: " .. item_name .. " x" .. count)
         return true
     end,
 
@@ -221,7 +223,7 @@ remote.add_interface("factorio_tasks",
     -- Takes in an item name, the entity take and a max count
     auto_insert_nearby = function(item_name, entity_type, max_count)
         if player_state.task_state ~= TASK_STATES.IDLE then
-            log("[AUTOMATE] Cannot start auto_insert_nearby task: Player is not idle")
+            log_message("Cannot start auto_insert_nearby task: Player is not idle")
             return false, "Task already in progress"
         end
         player_state.task_state = TASK_STATES.AUTO_INSERTING
@@ -230,7 +232,7 @@ remote.add_interface("factorio_tasks",
             entity_type = entity_type,
             max_count = max_count or math.huge
         }
-        log("[AUTOMATE] New auto_insert_nearby task for " .. item_name .. " into " .. entity_type)
+        log_message("New auto_insert_nearby task for " .. item_name .. " into " .. entity_type)
         return true, "Task started"
     end,
 
@@ -238,7 +240,7 @@ remote.add_interface("factorio_tasks",
     -- Takes in item_name, count and container_type
     pick_up_item = function(item_name, count, container_type)
         if player_state.task_state ~= TASK_STATES.IDLE then
-            log("[AUTOMATE] Cannot start pick_up_item task: Player is not idle")
+            log_message("Cannot start pick_up_item task: Player is not idle")
             return false, "Task already in progress"
         end
         player_state.task_state = TASK_STATES.PICKING_UP
@@ -248,7 +250,7 @@ remote.add_interface("factorio_tasks",
             container_type = container_type,
             search_radius = 8
         }
-        log("[AUTOMATE] New pick_up_item task: " .. item_name .. " x" .. count .. " from " .. container_type)
+        log_message("New pick_up_item task: " .. item_name .. " x" .. count .. " from " .. container_type)
         return true, "Task started"
     end,
 
@@ -256,16 +258,16 @@ remote.add_interface("factorio_tasks",
     -- Takes in an item_name and count
     craft_item = function(item_name, count)
         if player_state.task_state ~= TASK_STATES.IDLE then
-            log("[AUTOMATE] Cannot start craft_item task: Player is not idle")
+            log_message("Cannot start craft_item task: Player is not idle")
             return false, "Task already in progress"
         end
         local player = get_player()
         if not player.force.recipes[item_name] then
-            log("[AUTOMATE] Cannot start craft_item task: Recipe not available")
+            log_message("Cannot start craft_item task: Recipe not available")
             return false, "Recipe not available"
         end
         if not player.force.recipes[item_name].enabled then
-            log("[AUTOMATE] Cannot start craft_item task: Recipe not unlocked")
+            log_message("Cannot start craft_item task: Recipe not unlocked")
             return false, "Recipe not unlocked"
         end
         player_state.task_state = TASK_STATES.CRAFTING
@@ -274,7 +276,7 @@ remote.add_interface("factorio_tasks",
             count = count or 1,
             crafted = 0
         }
-        log("[AUTOMATE] New craft_item task: " .. item_name .. " x" .. count)
+        log_message("New craft_item task: " .. item_name .. " x" .. count)
         return true, "Task started"
     end,
 
@@ -282,7 +284,7 @@ remote.add_interface("factorio_tasks",
     -- Takes in a search radius
     attack_nearest_enemy = function(search_radius)
         if player_state.task_state ~= TASK_STATES.IDLE then
-            log("[AUTOMATE] Cannot start attack_nearest_enemy task: Player is not idle")
+            log_message("Cannot start attack_nearest_enemy task: Player is not idle")
             return false, "Task already in progress"
         end
         player_state.task_state = TASK_STATES.ATTACKING
@@ -290,48 +292,48 @@ remote.add_interface("factorio_tasks",
             search_radius = search_radius or 50,
             target = nil
         }
-        log("[AUTOMATE] New attack nearest enemy task, search radius: " .. player_state.parameters.search_radius)
+        log_message("New attack nearest enemy task, search radius: " .. player_state.parameters.search_radius)
         return true, "Task started"
     end,
 
-    -- Research a technology 
-    -- Takes in a technology name
-    research_technology = function(technology_name)
+    -- Research a technolog_messagey 
+    -- Takes in a technolog_messagey name
+    research_technolog_messagey = function(technolog_messagey_name)
         if player_state.task_state ~= TASK_STATES.IDLE then
-            log("[AUTOMATE] Cannot start research_technology task: Player is not idle")
+            log_message("Cannot start research_technolog_messagey task: Player is not idle")
             return false, "Task already in progress"
         end
         local player = get_player()
         local force = player.force
-        local tech = force.technologies[technology_name]
+        local tech = force.technolog_messageies[technolog_messagey_name]
         
         if not tech then
-            log("[AUTOMATE] Cannot start research_technology task: Technology not found")
-            return false, "Technology not found"
+            log_message("Cannot start research_technolog_messagey task: Technolog_messagey not found")
+            return false, "Technolog_messagey not found"
         end
         
         if tech.researched then
-            log("[AUTOMATE] Cannot start research_technology task: Technology already researched")
-            return false, "Technology already researched"
+            log_message("Cannot start research_technolog_messagey task: Technolog_messagey already researched")
+            return false, "Technolog_messagey already researched"
         end
         
         if not tech.enabled then
-            log("[AUTOMATE] Cannot start research_technology task: Technology not available for research")
-            return false, "Technology not available for research"
+            log_message("Cannot start research_technolog_messagey task: Technolog_messagey not available for research")
+            return false, "Technolog_messagey not available for research"
         end
         
         if not force.research_queue_enabled and force.current_research then
-            log("[AUTOMATE] Cannot start research_technology task: Research already in progress")
+            log_message("Cannot start research_technolog_messagey task: Research already in progress")
             return false, "Research already in progress"
         end
         
         force.add_research(tech)
-        log("[AUTOMATE] New research_technology task: " .. technology_name)
+        log_message("New research_technolog_messagey task: " .. technolog_messagey_name)
         return true, "Research started"
     end,
 
-    log_player_info = function(player_id)
-        log_player_info(player_id)
+    log_message_player_info = function(player_id)
+        log_message_player_info(player_id)
         return true
     end,
 })
@@ -344,9 +346,9 @@ script.on_event(defines.events.on_script_path_request_finished, function(event)
         player_state.parameters.path_drawn = false
         player_state.parameters.path_index = 1
         player_state.parameters.calculating_path = false
-        log("[AUTOMATE] Path calculation completed. Path length: " .. #event.path)
+        log_message("Path calculation completed. Path length: " .. #event.path)
     else
-        log("[AUTOMATE] Path calculation failed, switching to direct walking")
+        log_message("Path calculation failed, switching to direct walking")
         player_state.task_state = TASK_STATES.WALKING_DIRECT
         player_state.parameters.calculating_path = false
     end
@@ -354,7 +356,7 @@ end)
 
 -- Event handler for when a player mines something
 script.on_event(defines.events.on_player_mined_entity, function(event)
-    log("[AUTOMATE] Entity mined, resetting to IDLE state")
+    log_message("Entity mined, resetting to IDLE state")
     player_state.task_state = TASK_STATES.IDLE
     player_state.parameters = {}
 end)
@@ -365,13 +367,13 @@ script.on_event(defines.events.on_tick, function(event)
     if not setup_complete then
         local surface = game.surfaces[1]
         local enemies = surface.find_entities_filtered{force = "enemy"}
-        log("[AUTOMATE] Removing " .. #enemies .. " enemies")
+        log_message("Removing " .. #enemies .. " enemies")
         for _, enemy in pairs(enemies) do
             enemy.destroy()
         end
         
         setup_complete = true
-        log("[AUTOMATE] Setup complete")
+        log_message("Setup complete")
     end
 
     local player = get_player()
@@ -394,7 +396,7 @@ script.on_event(defines.events.on_tick, function(event)
             name = player_state.parameters.entity_name
         })
         if(#entities == 0) then
-            log("[AUTOMATE] No entities found, reverting to IDLE state")
+            log_message("No entities found, reverting to IDLE state")
             player_state.task_state = TASK_STATES.IDLE
             player_state.parameters = {}
             return
@@ -409,9 +411,9 @@ script.on_event(defines.events.on_tick, function(event)
             end
         end
 
-        log("[AUTOMATE] Nearest entity position: " .. serpent.line(nearest_entity.position))
-        log("[AUTOMATE] Player position: " .. serpent.line(player.position))
-        log("[AUTOMATE] Player bounding box: " .. serpent.line(player.character.bounding_box))
+        log_message("Nearest entity position: " .. serpent.line(nearest_entity.position))
+        log_message("Player position: " .. serpent.line(player.position))
+        log_message("Player bounding box: " .. serpent.line(player.character.bounding_box))
         
         -- Get a path to the nearest entity if we haven't already
         if nearest_entity and not player_state.parameters.calculating_path and not player_state.parameters.path then
@@ -450,7 +452,7 @@ script.on_event(defines.events.on_tick, function(event)
             }
             player_state.parameters.calculating_path = true
             player_state.parameters.target_position = nearest_entity.position
-            log("[AUTOMATE] Requested path calculation to " .. serpent.line(nearest_entity.position))
+            log_message("Requested path calculation to " .. serpent.line(nearest_entity.position))
         end
         
         -- If we finally have a path, follow it
@@ -469,7 +471,7 @@ script.on_event(defines.events.on_tick, function(event)
                     }
                 end
                 player_state.parameters.path_drawn = true
-                log("[AUTOMATE] Path drawn on ground")
+                log_message("Path drawn on ground")
             end
 
             local path = player_state.parameters.path
@@ -488,13 +490,13 @@ script.on_event(defines.events.on_tick, function(event)
                 -- Make sure we are going to next position correctly
                 if (next_position.x - player.position.x)^2 + (next_position.y - player.position.y)^2 < 0.01 then
                     player_state.parameters.path_index = path_index + 1
-                    log("[AUTOMATE] Moving to next path index: " .. player_state.parameters.path_index)
+                    log_message("Moving to next path index: " .. player_state.parameters.path_index)
                 end
                 -- Make sure we reach the target
                 if (nearest_entity.position.x - player.position.x)^2 + (nearest_entity.position.y - player.position.y)^2 < 2 then
                     player_state.state = TASK_STATES.IDLE
                     player_state.parameters = {}
-                    log("[AUTOMATE] Reached target entity, switching to IDLE state")
+                    log_message("Reached target entity, switching to IDLE state")
                 end
             else
                 -- We've reached the target - now what
@@ -502,10 +504,10 @@ script.on_event(defines.events.on_tick, function(event)
                 player.walking_state = {walking = false}
                 
                 if player_state.parameters.should_mine then
-                    log("[AUTOMATE] Switching to MINING state")
+                    log_message("Switching to MINING state")
                     player_state.task_state = TASK_STATES.MINING
                 else
-                    log("[AUTOMATE] Task completed, switching to IDLE state")
+                    log_message("Task completed, switching to IDLE state")
                     player_state.task_state = TASK_STATES.IDLE
                     player_state.parameters = {}
                 end
@@ -522,11 +524,11 @@ script.on_event(defines.events.on_tick, function(event)
             name = player_state.parameters.entity_name,
             limit = 1
         })[1]
-        log("[AUTOMATE] Mining entity: " .. player_state.parameters.entity_name)
+        log_message("Mining entity: " .. player_state.parameters.entity_name)
         if nearest_entity then
             start_mining(player, nearest_entity.position)
         else
-            log("[AUTOMATE] No entity found to mine, switching to IDLE state")
+            log_message("No entity found to mine, switching to IDLE state")
             player_state.task_state = TASK_STATES.IDLE
             player_state.parameters = {}
         end
@@ -534,7 +536,7 @@ script.on_event(defines.events.on_tick, function(event)
     -- Placing state
     elseif player_state.task_state == TASK_STATES.PLACING then
         if not player then 
-            log("[AUTOMATE] Invalid player, ending PLACING task")
+            log_message("Invalid player, ending PLACING task")
             return false, "Invalid player" 
         end
 
@@ -542,26 +544,26 @@ script.on_event(defines.events.on_tick, function(event)
         local inventory = player.get_main_inventory()
         
         if not inventory then 
-            log("[AUTOMATE] Cannot access player inventory, ending PLACING task")
+            log_message("Cannot access player inventory, ending PLACING task")
             return false, "Cannot access player inventory" 
         end
 
         local item_name = game.entity_prototypes[player_state.parameters.entity_name].items_to_place_this[1]
         if not item_name then 
-            log("[AUTOMATE] Invalid entity name, ending PLACING task")
+            log_message("Invalid entity name, ending PLACING task")
             return false, "Invalid entity name" 
         end
 
         local item_stack = inventory.find_item_stack(player_state.parameters.entity_name)
         if not item_stack then 
-            log("[AUTOMATE] Entity not found in inventory, ending PLACING task")
+            log_message("Entity not found in inventory, ending PLACING task")
             return false, "Entity not found in inventory" 
         end
 
         if not player_state.parameters.position then
             position = surface.find_non_colliding_position(player_state.parameters.entity_name, player.position, 1, 1)
             if not position then 
-                log("[AUTOMATE] Could not find a valid position to place the entity, ending PLACING task")
+                log_message("Could not find a valid position to place the entity, ending PLACING task")
                 return false, "Could not find a valid position to place the entity" 
             end
         end
@@ -578,14 +580,14 @@ script.on_event(defines.events.on_tick, function(event)
         
         if entity then
             item_stack.count = item_stack.count - 1
-            log("[AUTOMATE] Entity placed successfully: " .. player_state.parameters.entity_name)
+            log_message("Entity placed successfully: " .. player_state.parameters.entity_name)
             return true, "Entity placed successfully", entity
         else
-            log("[AUTOMATE] Failed to place entity: " .. player_state.parameters.entity_name)
+            log_message("Failed to place entity: " .. player_state.parameters.entity_name)
             return false, "Failed to place entity"
         end
 
-    -- Logic for automatically inserting items into nearby entities
+    -- log_messageic for automatically inserting items into nearby entities
     elseif player_state.task_state == TASK_STATES.AUTO_INSERTING then
         local player = get_player()
         local nearby_entities = player.surface.find_entities_filtered({
@@ -607,7 +609,7 @@ script.on_event(defines.events.on_tick, function(event)
                     if inserted > 0 then
                         player_inventory.remove({name = player_state.parameters.item_name, count = inserted})
                         inserted_total = inserted_total + inserted
-                        log("[AUTOMATE] Inserted " .. inserted .. " " .. player_state.parameters.item_name .. " into " .. entity.name)
+                        log_message("Inserted " .. inserted .. " " .. player_state.parameters.item_name .. " into " .. entity.name)
                     end
                     
                     if inserted_total >= player_state.parameters.max_count then
@@ -618,9 +620,9 @@ script.on_event(defines.events.on_tick, function(event)
         end
     
         if inserted_total == 0 then
-            log("[AUTOMATE] No items inserted, ending task")
+            log_message("No items inserted, ending task")
         else
-            log("[AUTOMATE] Inserted a total of " .. inserted_total .. " " .. player_state.parameters.item_name)
+            log_message("Inserted a total of " .. inserted_total .. " " .. player_state.parameters.item_name)
         end
         
         player_state.task_state = TASK_STATES.IDLE
@@ -652,7 +654,7 @@ script.on_event(defines.events.on_tick, function(event)
                     if picked_up > 0 then
                         container_inventory.remove({name = player_state.parameters.item_name, count = picked_up})
                         picked_up_total = picked_up_total + picked_up
-                        log("[AUTOMATE] Picked up " .. picked_up .. " " .. player_state.parameters.item_name .. " from " .. container.name)
+                        log_message("Picked up " .. picked_up .. " " .. player_state.parameters.item_name .. " from " .. container.name)
                     end
                     
                     if picked_up_total >= player_state.parameters.count then
@@ -663,9 +665,9 @@ script.on_event(defines.events.on_tick, function(event)
         end
     
         if picked_up_total == 0 then
-            log("[AUTOMATE] No items picked up, ending task")
+            log_message("No items picked up, ending task")
         else
-            log("[AUTOMATE] Picked up a total of " .. picked_up_total .. " " .. player_state.parameters.item_name)
+            log_message("Picked up a total of " .. picked_up_total .. " " .. player_state.parameters.item_name)
         end
         
         player_state.task_state = TASK_STATES.IDLE
@@ -677,7 +679,7 @@ script.on_event(defines.events.on_tick, function(event)
         local recipe = player.force.recipes[player_state.parameters.item_name]
         
         if not recipe then
-            log("[AUTOMATE] Recipe not found, ending task")
+            log_message("Recipe not found, ending task")
             player_state.task_state = TASK_STATES.IDLE
             player_state.parameters = {}
             return
@@ -691,7 +693,7 @@ script.on_event(defines.events.on_tick, function(event)
         for _, ingredient in pairs(ingredients) do
             if player_inventory.get_item_count(ingredient.name) < ingredient.amount then
                 can_craft = false
-                log("[AUTOMATE] Not enough " .. ingredient.name .. " to craft " .. player_state.parameters.item_name)
+                log_message("Not enough " .. ingredient.name .. " to craft " .. player_state.parameters.item_name)
                 break
             end
         end
@@ -707,16 +709,16 @@ script.on_event(defines.events.on_tick, function(event)
 
             player_state.parameters.crafted = player_state.parameters.crafted + 1
 
-            log("[AUTOMATE] Crafted 1 " .. player_state.parameters.item_name)
+            log_message("Crafted 1 " .. player_state.parameters.item_name)
 
             if player_state.parameters.crafted >= player_state.parameters.count then
-                log("[AUTOMATE] Crafting task complete")
+                log_message("Crafting task complete")
                 player_state.task_state = TASK_STATES.IDLE
                 player_state.parameters = {}
             end
         -- If can't craft, switch to idle
         else
-            log("[AUTOMATE] Not enough ingredients to craft, ending task")
+            log_message("Not enough ingredients to craft, ending task")
             player_state.task_state = TASK_STATES.IDLE
             player_state.parameters = {}
         end
@@ -724,15 +726,15 @@ script.on_event(defines.events.on_tick, function(event)
     -- Researching state
     elseif player_state.task_state == TASK_STATES.RESEARCHING then
         local force = player.force
-        local tech = force.technologies[player_state.parameters.technology_name]
+        local tech = force.technolog_messageies[player_state.parameters.technolog_messagey_name]
 
         -- With this, are you able to research while doing other things? Don't remember how that works in game
         if tech.researched then
-            log("[AUTOMATE] Research completed: " .. player_state.parameters.technology_name)
+            log_message("Research completed: " .. player_state.parameters.technolog_messagey_name)
             player_state.task_state = TASK_STATES.IDLE
             player_state.parameters = {}
         elseif force.current_research ~= tech then
-            log("[AUTOMATE] Research interrupted: " .. player_state.parameters.technology_name)
+            log_message("Research interrupted: " .. player_state.parameters.technolog_messagey_name)
             player_state.task_state = TASK_STATES.IDLE
             player_state.parameters = {}
         end
@@ -750,12 +752,12 @@ script.on_event(defines.events.on_tick, function(event)
             }
             
             if (target.x - player.position.x)^2 + (target.y - player.position.y)^2 < 2 then
-                log("[AUTOMATE] Reached target, switching to IDLE state")
+                log_message("Reached target, switching to IDLE state")
                 player_state.task_state = TASK_STATES.IDLE
                 player_state.parameters = {}
             end
         else
-            log("[AUTOMATE] No target position, switching to IDLE state")
+            log_message("No target position, switching to IDLE state")
             player_state.task_state = TASK_STATES.IDLE
             player_state.parameters = {}
         end
