@@ -30,7 +30,7 @@ local player_state = {
 
 -- Utility functions
 local function log_message(message)
-    log("" .. message)
+    log("[AUTOMATE]" .. message)
 end
 
 local function get_player()
