@@ -229,14 +229,14 @@ remote.add_interface("factorio_tasks",
             return false, "Technology not available for research"
         end
 
-        if not force.research_queue_enabled and force.current_research then
-            log("[AUTOMATE] Cannot start research_technology task: Research already in progress")
-            return false, "Research already in progress"
+        local research_added = force.add_research(tech)
+        if research_added then
+            log("[AUTOMATE] New research_technology task: " .. technology_name)
+            return true, "Research started"
+        else
+            log("[AUTOMATE] Could not start new research.")
+            return true, "Cannot start new research."
         end
-        
-        force.add_research(tech)
-        log("[AUTOMATE] New research_technology task: " .. technology_name)
-        return true, "Research started"
     end,
 
     log_player_info = function(player_id)
@@ -643,8 +643,8 @@ script.on_event(defines.events.on_tick, function(event)
                 player_inventory.remove({name = ingredient.name, count = ingredient.amount})
             end
 
-            local crafted_item = recipe.result
-            game.player.insert({name = crafted_item, count = 1})
+            local crafted_item = recipe.products
+            player.insert({name = crafted_item[1].name, count = crafted_item[1].amount})
 
             player_state.parameters.crafted = player_state.parameters.crafted + 1
 
