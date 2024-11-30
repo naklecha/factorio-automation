@@ -16,10 +16,10 @@ remote.call("factorio_tasks", "command_name", arg1, arg2, ...)
 ## Commands
 
 ### Movement and Interaction
-- `walk_to_entity(entity_type, entity_name, search_radius)`
+- `walk_to_entity(entity_name, search_radius)`
   Walk to the nearest specified entity within range.
 
-- `mine_entity(entity_type, entity_name)`
+- `mine_entity(entity_name)`
   Mine the nearest specified entity.
 
 - `place_entity(entity_name)`
@@ -57,23 +57,23 @@ This example, collects 5 stone, crafts a stone furnace, places a stone furnace, 
 /c remote.call("factorio_tasks", "place_entity", "stone-furnace")
 
 -- Walk to and mine coal
-/c remote.call("factorio_tasks", "walk_to_entity", "resource", "coal", 500)
-/c remote.call("factorio_tasks", "mine_entity", "resource", "coal")
-/c remote.call("factorio_tasks", "mine_entity", "resource", "coal")
-/c remote.call("factorio_tasks", "mine_entity", "resource", "coal")
-/c remote.call("factorio_tasks", "mine_entity", "resource", "coal")
-/c remote.call("factorio_tasks", "mine_entity", "resource", "coal")
+/c remote.call("factorio_tasks", "walk_to_entity", "coal", 500)
+/c remote.call("factorio_tasks", "mine_entity", "coal")
+/c remote.call("factorio_tasks", "mine_entity", "coal")
+/c remote.call("factorio_tasks", "mine_entity", "coal")
+/c remote.call("factorio_tasks", "mine_entity", "coal")
+/c remote.call("factorio_tasks", "mine_entity", "coal")
 
 -- Walk to and mine iron ore
-/c remote.call("factorio_tasks", "walk_to_entity", "resource", "iron-ore", 500)
-/c remote.call("factorio_tasks", "mine_entity", "resource", "iron-ore")
-/c remote.call("factorio_tasks", "mine_entity", "resource", "iron-ore")
-/c remote.call("factorio_tasks", "mine_entity", "resource", "iron-ore")
-/c remote.call("factorio_tasks", "mine_entity", "resource", "iron-ore")
-/c remote.call("factorio_tasks", "mine_entity", "resource", "iron-ore")
+/c remote.call("factorio_tasks", "walk_to_entity", "iron-ore", 500)
+/c remote.call("factorio_tasks", "mine_entity", "iron-ore")
+/c remote.call("factorio_tasks", "mine_entity", "iron-ore")
+/c remote.call("factorio_tasks", "mine_entity", "iron-ore")
+/c remote.call("factorio_tasks", "mine_entity", "iron-ore")
+/c remote.call("factorio_tasks", "mine_entity", "iron-ore")
 
 -- Walk to the nearest furnace
-/c remote.call("factorio_tasks", "walk_to_entity", "furnace", "stone-furnace", 50)
+/c remote.call("factorio_tasks", "walk_to_entity", "stone-furnace", 50)
 
 -- Put coal into the furnace
 /c remote.call("factorio_tasks", "auto_insert_nearby", "coal", "furnace", 5)

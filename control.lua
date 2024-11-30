@@ -90,7 +90,7 @@ end
 
 remote.add_interface("factorio_tasks", 
 {
-    walk_to_entity = function(entity_type, entity_name, search_radius)
+    walk_to_entity = function(entity_name, search_radius)
         if player_state.task_state ~= TASK_STATES.IDLE then
             log("[AUTOMATE] Cannot start walk_to_entity task: Player is not idle")
             return false
@@ -99,7 +99,6 @@ remote.add_interface("factorio_tasks",
         log("[AUTOMATE] New walk_to_entity task: " .. entity_type .. ", " .. entity_name .. ", radius: " .. search_radius)
         player_state.task_state = TASK_STATES.WALKING_TO_ENTITY
         player_state.parameters = {
-            entity_type = entity_type,
             entity_name = entity_name,
             search_radius = search_radius,
             path = nil,
@@ -111,16 +110,15 @@ remote.add_interface("factorio_tasks",
         }
         return true
     end,
-    
-    mine_entity = function(entity_type, entity_name)
+
+    mine_entity = function(entity_name)
         if player_state.task_state ~= TASK_STATES.IDLE then
             log("[AUTOMATE] Cannot start mine_entity task: Player is not idle")
             return false
         end
-        log("[AUTOMATE] New mine_entity task: " .. entity_type .. ", " .. entity_name)
+        log("[AUTOMATE] New mine_entity task: " .. ", " .. entity_name)
         player_state.task_state = TASK_STATES.MINING
         player_state.parameters = {
-            entity_type = entity_type,
             entity_name = entity_name
         }
     end,
@@ -341,7 +339,6 @@ script.on_event(defines.events.on_tick, function(event)
         local entities = player.surface.find_entities_filtered({
             position = player.position,
             radius = player_state.parameters.search_radius,
-            type = player_state.parameters.entity_type,
             name = player_state.parameters.entity_name
         })
         if(#entities == 0) then
@@ -376,15 +373,27 @@ script.on_event(defines.events.on_tick, function(event)
                 0.5,
                 false
             )
+
+            if not start then
+                log("[AUTOMATE] find_non_colliding_position returned nil! Aborting pathfinding.")
+                return
+            end
+
+            local collision_mask = {
+                layers = {
+                    player = true,
+                    train = true,
+                    water_tile = true,
+                    object = true,
+--                     car = true,
+--                     cliff = true
+                },
+                consider_tile_transitions = true,
+            }
+
             player.surface.request_path{
                 bounding_box = bbox,
-                collision_mask = {
-                    "player-layer",
-                    "train-layer",
-                    "consider-tile-transitions",
-                    "water-tile",
-                    "object-layer"
-                },
+                collision_mask = collision_mask,
                 radius = 2,
                 start = start,
                 goal = nearest_entity.position,
@@ -458,7 +467,6 @@ script.on_event(defines.events.on_tick, function(event)
         local nearest_entity = player.surface.find_entities_filtered({
             position = player.position,
             radius = 2,
-            type = player_state.parameters.entity_type,
             name = player_state.parameters.entity_name,
             limit = 1
         })[1]
@@ -484,8 +492,8 @@ script.on_event(defines.events.on_tick, function(event)
             return false, "Cannot access player inventory" 
         end
 
-        local item_name = game.entity_prototypes[player_state.parameters.entity_name].items_to_place_this[1]
-        if not item_name then 
+        local item_name = prototypes.entity[player_state.parameters.entity_name].items_to_place_this[1]
+        if not item_name then
             log("[AUTOMATE] Invalid entity name, ending PLACING task")
             return false, "Invalid entity name" 
         end
