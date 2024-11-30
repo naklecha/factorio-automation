@@ -26,14 +26,11 @@ remote.call("factorio_tasks", "command_name", arg1, arg2, ...)
   Place the specified entity at current position.
 
 ### Inventory Management
-- `place_item_in_chest(item_name, count)`
-  Put items into a nearby chest.
-
-- `auto_insert_nearby(item_name, entity_type, max_count)`
+- `auto_insert_nearby(item_name, entity_name, max_count)`
   Insert items into nearby entities, up to a limit.
 
-- `pick_up_item(item_name, count, container_type)`
-  Collect items from nearby containers.
+- `pick_up_item(item_name, container_name, count)`
+  Collect items from nearby containers or entities.
 
 ### Crafting and Research
 - `craft_item(item_name, count)`
@@ -76,10 +73,10 @@ This example, collects 5 stone, crafts a stone furnace, places a stone furnace, 
 /c remote.call("factorio_tasks", "walk_to_entity", "stone-furnace", 50)
 
 -- Put coal into the furnace
-/c remote.call("factorio_tasks", "auto_insert_nearby", "coal", "furnace", 5)
+/c remote.call("factorio_tasks", "auto_insert_nearby", "coal", "stone-furnace", 5)
 
 -- Put iron ore into the furnace
-/c remote.call("factorio_tasks", "auto_insert_nearby", "iron-ore", "furnace", 5)
+/c remote.call("factorio_tasks", "auto_insert_nearby", "iron-ore", "stone-furnace", 5)
 ```
 
 ### Contributing
